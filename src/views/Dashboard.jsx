@@ -1,176 +1,337 @@
-import React, {useEffect, useRef, useState} from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { fetchByCoords, fetchCityByName } from '../features/weather/weatherSlice'
-import SearchBarPro from '../widgets/SearchBarPro'
-import CityCard from '../widgets/CityCard'
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-export default function Dashboard(){
-  const dispatch = useDispatch()
-  const cities = useSelector(s => s.weather.cities)
-  const favorites = useSelector(s => s.favorites.list)
-  const units = useSelector(s => s.settings.units)
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+import { fetchByCoords, fetchCityByName } from "../features/weather/weatherSlice";
+import SearchBarPro from "../widgets/SearchBarPro";
+import CityCard from "../widgets/CityCard";
 
-  // helper: determine if a city entry matches a favorite identifier
+export default function Dashboard() {
+  const dispatch = useDispatch();
+  const cities = useSelector((s) => s.weather.cities);
+  const favorites = useSelector((s) => s.favorites.list);
+  const units = useSelector((s) => s.settings.units);
+
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const navigate = useNavigate();
+
+  // Inject styles
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = PREMIUM_STYLES;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  // ---------------- FAVORITES HANDLING ---------------- //
   function favMatches(fav, key, item) {
-    if (!fav) return false
-    const favStr = String(fav).trim()
-    const key2 = String(key).trim()
-    
-    // direct key match (handles lat,lon format)
-    if (favStr === key2) return true
-    
-    // try URL decoding both
+    if (!fav) return false;
+    const f = fav.trim();
+    const k = key.trim();
+
+    if (f === k) return true;
+
     try {
-      if (decodeURIComponent(favStr) === decodeURIComponent(key2)) return true
-    } catch (e) {}
-    
-    // match by name (case-insensitive)
-    const name = item?.meta?.name
-    if (name && favStr.toLowerCase() === name.toLowerCase()) return true
-    
-    return false
+      if (decodeURIComponent(f) === decodeURIComponent(k)) return true;
+    } catch {}
+
+    const name = item?.meta?.name?.trim().toLowerCase();
+    return name && name === f.toLowerCase();
   }
 
-  useEffect(()=>{
-    // when favorites change, fetch any favorites that aren't already loaded
-    favorites.forEach(fav => {
-      // fav is stored as lat,lon key; if it contains a comma fetch by coords
-      if (fav && fav.includes(',')){
-        const [lat, lon] = fav.split(',').map(x => parseFloat(x))
-        // normalize key the same way as the Redux slice
-        const normalizedKey = `${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}`
-        // only fetch if not already in cities
-        if (!cities[normalizedKey]) {
-          dispatch(fetchByCoords({ lat, lon, units }))
-        }
-      } else if (fav) {
-        // for name-based favorites, check if we already have it
-        const alreadyLoaded = Object.values(cities).some(c => c.meta && c.meta.name === fav)
-        if (!alreadyLoaded) {
-          dispatch(fetchCityByName({ name: fav, units }))
-        }
-      }
-    })
-  }, [favorites, dispatch, units])
-
-  const navigate = useNavigate()
-  const refreshIntervalRef = useRef()
-
-  // hook: realtime refresh
-  useRealtimeRefresh(cities, dispatch, units)
-
-  // when units change, immediately re-fetch current cities in the selected units
+  // Auto load missing favorites
   useEffect(() => {
-    Object.values(cities).forEach(item => {
-      const meta = item.meta || {}
-      if (meta.lat != null && meta.lon != null) {
-        dispatch(fetchByCoords({ lat: meta.lat, lon: meta.lon, units }))
-      }
-    })
-  }, [units, dispatch])
+    favorites.forEach((fav) => {
+      if (!fav) return;
 
+      if (fav.includes(",")) {
+        const [lat, lon] = fav.split(",").map(Number);
+        const key = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+
+        if (!cities[key]) {
+          dispatch(fetchByCoords({ lat, lon, units }));
+        }
+      } else {
+        const exists = Object.values(cities).some(
+          (c) => c.meta?.name?.toLowerCase() === fav.toLowerCase()
+        );
+
+        if (!exists) {
+          dispatch(fetchCityByName({ name: fav, units }));
+        }
+      }
+    });
+  }, [favorites, cities, units, dispatch]);
+
+  // Re-fetch when units change
+  useEffect(() => {
+    Object.values(cities).forEach(({ meta }) => {
+      if (meta?.lat && meta?.lon)
+        dispatch(fetchByCoords({ lat: meta.lat, lon: meta.lon, units }));
+    });
+  }, [units, dispatch]);
+
+  // Realtime updates
+  usePremiumRealtimeRefresh(cities, dispatch, units);
+
+  // ---------------- UI ---------------- //
   return (
-    <div>
-      <div className="hero">
-        <div className="hero-left">
-          <div className="hero-title">Weather Analytics Dashboard</div>
-          <div className="hero-sub">Overview of current conditions, forecasts, and trends for your saved locations.</div>
+    <div className="pg-container">
+      {/* ---------------- HERO ---------------- */}
+      <div className="pg-hero">
+        <div className="pg-hero-content">
+          <h1>Weather Analytics Dashboard</h1>
+          <p>
+            Track real-time weather, forecasts, and trends. Designed with a premium
+            professional UI.
+          </p>
         </div>
-        <div className="hero-stats">
-          <div className="stat">Cities</div>
-          <div className="stat">Favorites</div>
+
+        <div className="pg-hero-stats">
+          <div className="pg-stat-box">
+            <strong>{Object.keys(cities).length}</strong>
+            <span>Cities</span>
+          </div>
+
+          <div className="pg-stat-box">
+            <strong>{favorites.length}</strong>
+            <span>Favorites</span>
+          </div>
         </div>
+
+        <svg className="pg-orb" viewBox="0 0 500 500">
+          <defs>
+            <radialGradient id="pg-grad" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#8da2ff" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#74d9ff" stopOpacity="0.35" />
+            </radialGradient>
+          </defs>
+          <circle cx="250" cy="250" r="200" fill="url(#pg-grad)" />
+        </svg>
       </div>
 
-      {/* Centered Professional Search Bar */}
-      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,marginBottom:32,paddingX:20}}>
+      {/* ---------------- Search + Favorites Button ---------------- */}
+      <div className="pg-search-container">
         <SearchBarPro />
+
         <button
-          onClick={() => setShowFavoritesOnly(s => !s)}
-          style={{
-            padding:'10px 24px',
-            fontSize:'0.95rem',
-            fontWeight:600,
-            border: showFavoritesOnly ? '2px solid #667eea' : '2px solid #e2e8f0',
-            backgroundColor: showFavoritesOnly ? '#667eea' : 'white',
-            color: showFavoritesOnly ? 'white' : '#333',
-            borderRadius:8,
-            cursor:'pointer',
-            transition:'all 0.3s',
-            boxShadow: showFavoritesOnly ? '0 4px 12px rgba(102, 126, 234, 0.3)' : 'none'
-          }}
-          onMouseEnter={(e) => {
-            if (!showFavoritesOnly) {
-              e.target.style.borderColor = '#667eea'
-              e.target.style.color = '#667eea'
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!showFavoritesOnly) {
-              e.target.style.borderColor = '#e2e8f0'
-              e.target.style.color = '#333'
-            }
-          }}
-          title="Toggle favorites view"
+          className={`pg-fav-toggle ${showFavoritesOnly ? "active" : ""}`}
+          onClick={() => setShowFavoritesOnly((x) => !x)}
         >
-          {showFavoritesOnly ? '★ Show All Cities' : `☆ Show Favorites (${favorites.length})`}
+          {showFavoritesOnly
+            ? "★ Show All Cities"
+            : `☆ Show Favorites (${favorites.length})`}
         </button>
       </div>
 
-      <div className="grid">
+      {/* ---------------- CITY GRID ---------------- */}
+      <div className="pg-grid">
         {Object.keys(cities).length === 0 && (
-          <div className="card">No cities yet — use the search box to add a city.</div>
+          <div className="pg-empty">Search a city to begin.</div>
         )}
+
         {(() => {
-          const favSet = new Set(favorites || [])
-          const entries = Object.entries(cities).filter(([key, item]) => {
-            if (!showFavoritesOnly) return true
-            // show only if any favorite matches this entry
-            return (favorites || []).some(fav => favMatches(fav, key, item))
-          })
+          const filtered = Object.entries(cities).filter(([key, item]) =>
+            showFavoritesOnly
+              ? favorites.some((fav) => favMatches(fav, key, item))
+              : true
+          );
 
-          if (entries.length === 0) {
+          if (filtered.length === 0)
             return (
-              <div className="card">{showFavoritesOnly ? 'No favorites yet — add some from the cards.' : 'No cities yet — use the search box to add a city.'}</div>
-            )
-          }
-
-          return entries.map(([key, item]) => (
-            <div key={key} style={{position:'relative'}}>
-              <CityCard id={key} city={item} units={units} />
-              <div style={{position:'absolute',top:8,right:8}}>
-                <button onClick={() => navigate(`/city/${encodeURIComponent(key)}`)} style={{padding:'6px 8px',borderRadius:6}}>Show</button>
+              <div className="pg-empty">
+                {showFavoritesOnly
+                  ? "No favorites yet."
+                  : "Use search to add cities."}
               </div>
+            );
+
+          return filtered.map(([key, item]) => (
+            <div key={key} className="pg-card-wrapper">
+              <CityCard id={key} city={item} units={units} />
+
+              <button
+                className="pg-open-btn"
+                onClick={() => navigate(`/city/${encodeURIComponent(key)}`)}
+              >
+                View →
+              </button>
             </div>
-          ))
+          ));
         })()}
       </div>
     </div>
-  )
+  );
 }
 
-// Periodically refresh visible cities every 55s to keep data near real-time
-// (We use a ref to ensure only one interval is active.)
-function useRealtimeRefresh(cities, dispatch, units) {
-  const intervalRef = useRef(null)
+/* --------------------------------------------------------
+   PREMIUM REALTIME REFRESH HOOK
+-------------------------------------------------------- */
+function usePremiumRealtimeRefresh(cities, dispatch, units) {
+  const ref = useRef(null);
+
   useEffect(() => {
-    // clear previous
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    intervalRef.current = setInterval(() => {
-      Object.values(cities).forEach(item => {
-        const meta = item.meta || {}
-        if (meta.lat != null && meta.lon != null) {
-          dispatch(fetchByCoords({ lat: meta.lat, lon: meta.lon, units }))
-        }
-      })
-    }, 55_000)
+    if (ref.current) clearInterval(ref.current);
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [cities, dispatch, units])
+    ref.current = setInterval(() => {
+      Object.values(cities).forEach(({ meta }) => {
+        if (meta?.lat && meta?.lon) {
+          dispatch(fetchByCoords({ lat: meta.lat, lon: meta.lon, units }));
+        }
+      });
+    }, 55000);
+
+    return () => clearInterval(ref.current);
+  }, [cities, units, dispatch]);
 }
 
-// Hook usage: call at bottom of file to wire it into the Dashboard component
+/* --------------------------------------------------------
+   PREMIUM GLASS UI STYLES (NO DARK MODE)
+-------------------------------------------------------- */
+const PREMIUM_STYLES = `
+.pg-container {
+  max-width: 1280px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* ---------------- HERO ---------------- */
+.pg-hero {
+  position: relative;
+  padding: 60px 28px 90px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(210,220,255,0.45);
+  overflow: hidden;
+  margin-bottom: 34px;
+  animation: pgFade 0.75s ease-out;
+}
+
+.pg-hero-content h1 {
+  font-size: 38px;
+  font-weight: 800;
+  color: #2a3b9e;
+  margin: 0;
+}
+.pg-hero-content p {
+  color: #60729c;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.pg-orb {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 340px;
+  height: 340px;
+  animation: pgFloat 7s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@keyframes pgFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(16px); }
+  100% { transform: translateY(0px); }
+}
+@keyframes pgFade {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pg-hero-stats {
+  margin-top: 18px;
+  display: flex;
+  gap: 18px;
+}
+.pg-stat-box {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #dfe6ff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  padding: 14px 26px;
+  text-align: center;
+}
+.pg-stat-box strong {
+  font-size: 26px;
+  color: #2a3b9e;
+}
+.pg-stat-box span {
+  display: block;
+  color: #60729c;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+/* ---------------- SEARCH ---------------- */
+.pg-search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.pg-fav-toggle {
+  padding: 12px 26px;
+  border-radius: 12px;
+  border: 2px solid #d2d8f5;
+  background: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.pg-fav-toggle:hover {
+  border-color: #6b82ff;
+  color: #6b82ff;
+}
+.pg-fav-toggle.active {
+  background: #6b82ff;
+  color: white;
+  border-color: #6b82ff;
+  box-shadow: 0 6px 18px rgba(107,130,255,0.35);
+}
+
+/* ---------------- GRID ---------------- */
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 24px;
+  animation: pgFade 0.7s ease-out;
+}
+
+.pg-empty {
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid #dfe6ff;
+  text-align: center;
+  font-weight: 600;
+  color: #60729c;
+}
+
+.pg-card-wrapper {
+  position: relative;
+}
+
+.pg-open-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #ccd7ff;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.pg-open-btn:hover {
+  background: #eef2ff;
+  border-color: #6b82ff;
+  color: #6b82ff;
+}
+`;

@@ -129,7 +129,7 @@ export default function CityCard({ id, city, units }) {
       )}
 
       {/* top-right action buttons */}
-      <div className="absolute top-3 right-3 flex items-center">
+      <div className="absolute top-3 left-3 flex items-center">
         <button
           onClick={toggleFav}
           className="text-sm focus:outline-none mr-2"
@@ -141,14 +141,14 @@ export default function CityCard({ id, city, units }) {
           </span>
         </button>
 
-        <button
+        {/* <button
           onClick={(e) => { e.stopPropagation(); onRefresh(); }}
           className="text-xs px-2 py-1 rounded"
           style={{ background: "#eef2ff", borderRadius: 6, border: "1px solid rgba(0,0,0,0.03)" }}
           title="Refresh"
         >
           ↻
-        </button>
+        </button> */}
       </div>
 
       {/* Header row: city name + icon and current temp */}

@@ -1,309 +1,427 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { FiCloud, FiTrendingUp, FiMapPin, FiRefreshCw } from 'react-icons/fi'
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  FiCloud,
+  FiMail,
+  FiPhone,
+  FiRefreshCw,
+  FiTrendingUp,
+  FiMapPin,
+  FiArrowUpCircle,
+  FiMenu,
+  FiX,
+} from "react-icons/fi";
 
 export default function Landing() {
+  const aboutRef = useRef(null);
+  const featuresRef = useRef(null);
+  const contactRef = useRef(null);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const scrollTo = (ref) => {
+    if (!ref?.current) return;
+    ref.current.scrollIntoView({ behavior: "smooth" });
+    setMenuOpen(false);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setMenuOpen(false);
+  };
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Navigation Bar */}
-      <nav
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px 40px',
-          backgroundColor: 'white',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <FiCloud size={32} style={{ color: '#667eea' }} />
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: '#333' }}>
-            Weather Analytics
-          </h1>
+    <>
+      {/* PAGE CSS */}
+      <style>{`
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: 'Poppins', sans-serif;
+          background: linear-gradient(to bottom, #eaf3ff, #f4f6ff, #ffffff);
+        }
+
+        /* ========== NAVBAR ========== */
+        .nav {
+          position: fixed;
+          top: 0;
+          width: 100%;
+          padding: 16px 40px;
+          background: rgba(255,255,255,0.85);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(200,200,255,0.4);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 100;
+        }
+
+        .nav-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .nav-brand-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #3554d1;
+        }
+
+        .nav-links {
+          display: flex;
+          gap: 28px;
+          align-items: center;
+        }
+
+        .nav-links span {
+          cursor: pointer;
+          font-weight: 600;
+          color: #485989;
+          transition: 0.2s;
+        }
+        .nav-links span:hover {
+          color: #6a4ffd;
+        }
+
+        .nav-btn {
+          padding: 10px 22px;
+          background: linear-gradient(90deg, #5e7cea, #7b5df6);
+          color: white;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+
+        .mobile-menu-icon {
+          display: none;
+          cursor: pointer;
+        }
+
+        /* MOBILE MENU */
+        .mobile-menu {
+          position: fixed;
+          top: 0;
+          right: 0;
+          width: 240px;
+          height: 100%;
+          background: white;
+          box-shadow: -2px 0px 10px rgba(0,0,0,0.1);
+          padding: 25px;
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+          z-index: 200;
+        }
+
+        .mobile-link {
+          font-size: 16px;
+          font-weight: 600;
+          color: #3a4c7f;
+          cursor: pointer;
+        }
+
+        @media(max-width: 860px) {
+          .nav-links { display: none; }
+          .mobile-menu-icon { display: block; }
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+          margin-top: 120px;
+          display: flex;
+          padding: 40px;
+          justify-content: space-between;
+          align-items: center;
+          gap: 40px;
+        }
+
+        .hero-left {
+          max-width: 550px;
+        }
+
+        .hero-title {
+          font-size: 48px;
+          font-weight: 800;
+          line-height: 1.2;
+          color: #1f2d55;
+        }
+
+        .hero-sub {
+          margin-top: 14px;
+          font-size: 18px;
+          color: #4f5d80;
+        }
+
+        .hero-buttons {
+          margin-top: 26px;
+          display: flex;
+          gap: 16px;
+        }
+
+        .btn-main {
+          padding: 14px 30px;
+          background: white;
+          border: 1px solid #ccd7ff;
+          border-radius: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+
+        .btn-main:hover { transform: scale(1.03); }
+
+        .btn-outline {
+          padding: 14px 30px;
+          border-radius: 12px;
+          background: #eef2ff;
+          font-weight: 600;
+          color: #4b6ce0;
+          cursor: pointer;
+        }
+
+        .card {
+          width: 340px;
+          padding: 24px;
+          border-radius: 22px;
+          background: rgba(255,255,255,0.85);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(190,200,255,0.5);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-top {
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .mini-boxes {
+          margin-top: 20px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+
+        .mini-box {
+          padding: 10px;
+          text-align: center;
+          background: rgba(255,255,255,0.7);
+          border-radius: 12px;
+          font-size: 14px;
+          color: #324066;
+        }
+
+        .hours {
+          margin-top: 20px;
+          display: flex;
+          gap: 14px;
+          overflow-x: auto;
+        }
+
+        .hour-card {
+          min-width: 80px;
+          background: rgba(255,255,255,0.7);
+          padding: 10px;
+          border-radius: 12px;
+          text-align: center;
+        }
+
+        @media(max-width:960px) {
+          .hero {
+            flex-direction: column;
+            text-align: center;
+          }
+          .card { width: 100%; max-width: 380px; }
+        }
+
+        /* ========== SECTIONS ========== */
+        section {
+          padding: 80px 40px;
+          text-align: center;
+        }
+
+        .features-grid {
+          margin-top: 40px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 28px;
+        }
+
+        .feature-card {
+          background: white;
+          border-radius: 18px;
+          padding: 25px;
+          border: 1px solid #d5ddff;
+          box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .contact-box {
+          margin-top: 40px;
+          display: flex;
+          gap: 60px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .scroll-top {
+          position: fixed;
+          right: 25px;
+          bottom: 30px;
+          cursor: pointer;
+        }
+      `}</style>
+
+      {/* ========== NAVBAR ========== */}
+      <div className="nav">
+        <div className="nav-brand">
+          <FiCloud size={32} color="#4b6ce0" />
+          <div>
+            <div className="nav-brand-title">SkyWeather</div>
+            <div style={{ fontSize: 12, opacity: 0.7 }}>Weather Analytics</div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link
-            to="/"
-            style={{
-              textDecoration: 'none',
-              color: '#667eea',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              padding: '8px 16px',
-              borderRadius: 6,
-              transition: 'all 0.3s',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#f0f4ff'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent'
-            }}
-          >
-            Home
-          </Link>
+        <div className="nav-links">
+          <span onClick={scrollToTop}>Home</span>
+          <span onClick={() => scrollTo(aboutRef)}>About</span>
+          <span onClick={() => scrollTo(featuresRef)}>Features</span>
+          <span onClick={() => scrollTo(contactRef)}>Contact</span>
 
-          <Link
-            to="/dashboard"
-            style={{
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              padding: '10px 20px',
-              backgroundColor: '#667eea',
-              borderRadius: 6,
-              transition: 'all 0.3s',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#764ba2'
-              e.target.style.transform = 'translateY(-2px)'
-              e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#667eea'
-              e.target.style.transform = 'translateY(0)'
-              e.target.style.boxShadow = 'none'
-            }}
-          >
+          {/* ⭐ FIXED (a → Link) */}
+          <Link to="/dashboard" className="nav-btn" style={{ display: "inline-block" }}>
             Dashboard
           </Link>
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <div
-        style={{
-          flex: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
-          padding: '40px 20px',
-        }}
-      >
-        <FiCloud size={80} style={{ marginBottom: 20 }} />
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 700, margin: '20px 0', maxWidth: 600 }}>
-          Weather Analytics Dashboard
-        </h1>
-        <p style={{ fontSize: '1.2rem', marginBottom: 40, maxWidth: 500, opacity: 0.95 }}>
-          Real-time weather data, forecasts, and detailed analytics for your favorite locations.
-        </p>
+        <div className="mobile-menu-icon" onClick={() => setMenuOpen(true)}>
+          <FiMenu size={30} color="#3554d1" />
+        </div>
+      </div>
 
-        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link
-            to="/dashboard"
-            style={{
-              padding: '14px 32px',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              backgroundColor: 'white',
-              color: '#667eea',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              textDecoration: 'none',
-              transition: 'all 0.3s',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)'
-              e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)'
-              e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'
-            }}
-          >
-            Get Started
+      {/* ========== MOBILE MENU ========== */}
+      {menuOpen && (
+        <div className="mobile-menu">
+          <FiX size={30} onClick={() => setMenuOpen(false)} style={{ cursor: "pointer" }} />
+
+          <div className="mobile-link" onClick={scrollToTop}>Home</div>
+          <div className="mobile-link" onClick={() => scrollTo(aboutRef)}>About</div>
+          <div className="mobile-link" onClick={() => scrollTo(featuresRef)}>Features</div>
+          <div className="mobile-link" onClick={() => scrollTo(contactRef)}>Contact</div>
+
+          {/* ⭐ FIXED */}
+          <Link to="/dashboard" className="nav-btn" style={{ display: "inline-block" }}>
+            Dashboard
           </Link>
         </div>
-      </div>
+      )}
 
-      {/* Features Section */}
-      <div style={{ padding: '60px 20px', backgroundColor: '#f8f9fa' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '2.2rem', marginBottom: 50, color: '#333' }}>
-          Features
-        </h2>
+      {/* ========== HERO ========== */}
+      <div className="hero">
+        <div className="hero-left">
+          <div className="hero-title">Understand Weather Like Never Before</div>
+          <div className="hero-sub">Visual weather insights, live updates, and advanced analytics.</div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: 30,
-            maxWidth: 1200,
-            margin: '0 auto',
-          }}
-        >
-          {/* Feature 1 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiMapPin size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              Multiple Locations
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Search and add weather data for multiple cities around the world.
-            </p>
+          <div className="hero-buttons">
+            {/* ⭐ FIXED */}
+            <Link to="/dashboard" className="btn-main" style={{ display: "inline-block" }}>
+              Explore Dashboard
+            </Link>
+
+            <button className="btn-outline" onClick={() => scrollTo(featuresRef)}>
+              See Features
+            </button>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-top">
+            <div>
+              <div style={{ fontSize: 14 }}>Pune, IN</div>
+              <div style={{ fontSize: 36, fontWeight: 700 }}>29°C</div>
+              <div style={{ fontSize: 12, opacity: 0.7 }}>Cloudy • Feels 30°C</div>
+            </div>
+            <FiCloud size={45} color="#4b6ce0" />
           </div>
 
-          {/* Feature 2 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiTrendingUp size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              Detailed Charts
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Visualize hourly and daily weather trends with interactive charts.
-            </p>
+          <div className="mini-boxes">
+            <div className="mini-box">Humidity: 56%</div>
+            <div className="mini-box">Wind: 14 kph</div>
           </div>
 
-          {/* Feature 3 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiRefreshCw size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              Real-Time Updates
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Stay updated with automatic refreshes every 55 seconds.
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiCloud size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              Save Favorites
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Save your favorite locations and access them instantly.
-            </p>
-          </div>
-
-          {/* Feature 5 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiTrendingUp size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              7-Day Forecast
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Get accurate weather forecasts for the next week.
-            </p>
-          </div>
-
-          {/* Feature 6 */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: 30,
-              borderRadius: 12,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              textAlign: 'center',
-            }}
-          >
-            <FiRefreshCw size={48} style={{ color: '#667eea', marginBottom: 15 }} />
-            <h3 style={{ fontSize: '1.3rem', marginBottom: 10, color: '#333' }}>
-              Unit Selection
-            </h3>
-            <p style={{ color: '#666', lineHeight: 1.6 }}>
-              Switch between Celsius and Fahrenheit instantly.
-            </p>
+          <div style={{ marginTop: 20, fontWeight: 600 }}>Next Hours</div>
+          <div className="hours">
+            {[6, 8, 10, 12, 14, 16].map((t, i) => (
+              <div className="hour-card" key={i}>
+                <div>{t}:00</div>
+                <div style={{ fontWeight: 700 }}>{24 + (i % 3)}</div>
+                <div>{i % 2 ? "☀️" : "🌤️"}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Call to Action Section */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          padding: '60px 20px',
-          textAlign: 'center',
-        }}
-      >
-        <h2 style={{ fontSize: '2rem', marginBottom: 20 }}>
-          Ready to explore weather like never before?
-        </h2>
-        <p style={{ fontSize: '1.1rem', marginBottom: 30 }}>
-          Get instant access to real-time weather analytics and forecasts.
+      {/* ========== ABOUT SECTION ========== */}
+      <section ref={aboutRef}>
+        <h2 style={{ fontSize: 34, fontWeight: 700 }}>About SkyWeather</h2>
+        <p style={{ maxWidth: 700, margin: "16px auto", fontSize: 16 }}>
+          SkyWeather provides accurate forecasts, climate analytics,
+          and city-wise real-time updates to help users stay informed.
         </p>
-        {/* <Link
-          to="/dashboard"
+      </section>
+
+      {/* ========== FEATURES SECTION ========== */}
+      <section ref={featuresRef}>
+        <h2 style={{ fontSize: 34, fontWeight: 700 }}>Features</h2>
+        <div className="features-grid">
+          {FEATURES.map((f, i) => (
+            <div className="feature-card" key={i}>
+              <f.icon size={42} color="#4b6ce0" />
+              <h3 style={{ marginTop: 14 }}>{f.title}</h3>
+              <p style={{ fontSize: 14, marginTop: 6, color: "#4d5b8b" }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ========== CONTACT SECTION ========== */}
+      <section ref={contactRef}>
+        <h2
           style={{
-            display: 'inline-block',
-            padding: '14px 40px',
-            fontSize: '1.1rem',
-            fontWeight: 600,
-            backgroundColor: 'white',
-            color: '#667eea',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            textDecoration: 'none',
-            transition: 'all 0.3s',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)'
-            e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)'
-            e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'
+            fontSize: 34,
+            fontWeight: 700,
+            color: "white",
+            padding: "20px",
+            borderRadius: 16,
+            background: "linear-gradient(90deg,#7b5df6,#4b6ce0)",
           }}
         >
-          Launch Dashboard
-        </Link> */}
+          Contact Us
+        </h2>
+
+        <div className="contact-box">
+          <div className="contact-item">
+            <FiMail size={42} color="#4b6ce0" />
+            <p>surajzagare225@gmail.com</p>
+          </div>
+
+          <div className="contact-item">
+            <FiPhone size={42} color="#4b6ce0" />
+            <p>+91 9325798775</p>
+          </div>
+        </div>
+      </section>
+
+      {/* SCROLL TO TOP */}
+      <div className="scroll-top" onClick={scrollToTop}>
+        <FiArrowUpCircle size={50} color="#4b6ce0" />
       </div>
-    </div>
-  )
+    </>
+  );
 }
+
+const FEATURES = [
+  { icon: FiMapPin, title: "Global Tracking", desc: "Monitor cities worldwide." },
+  { icon: FiTrendingUp, title: "Interactive Charts", desc: "Visual climate & temperature analysis." },
+  { icon: FiRefreshCw, title: "Live Updates", desc: "" },
+  { icon: FiCloud, title: "Cloud Analysis", desc: "Track cloud movement in real-time." },
+];
