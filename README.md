@@ -1,9 +1,3 @@
-Perfect 👍
-Below is a **clean, professional GitHub README** you can directly copy-paste.
-I’ve kept it **simple, high-impact**, and **recruiter-friendly**.
-(You can replace the **Demo Link** later with your actual deployed URL.)
-
----
 
 # 🌦️ Weather Analytics Dashboard
 
@@ -13,7 +7,7 @@ A modern **Weather Analytics Dashboard** built with **React and Redux Toolkit** 
 
 ## 🚀 Live Demo
 
-🔗 **Demo Link:** [https://your-demo-link-here.com](https://your-demo-link-here.com)
+🔗 **Demo Link:** [https://your-demo-link-here.com](https://weather-dashboard-54135183.netlify.app/)
 
 ---
 
@@ -95,19 +89,7 @@ A modern **Weather Analytics Dashboard** built with **React and Redux Toolkit** 
 
 ## 🤝 Connect With Me
 
-* **LinkedIn:** [https://www.linkedin.com/in/your-profile](https://www.linkedin.com/in/your-profile)
-* **GitHub:** [https://github.com/your-username](https://github.com/your-username)
+* **LinkedIn:** [https://www.linkedin.com/in/your-profile](https://www.linkedin.com/in/suraj-zagare-5592a724a/)
+* **GitHub:** [https://github.com/your-username](https://github.com/SurajZagare/)
 
----
 
-⭐ If you like this project, don’t forget to **star the repository!**
-
----
-
-If you want, I can also:
-
-* Replace this with **your real demo link**
-* Make a **more ATS/recruiter-focused README**
-* Create a **LinkedIn post matching this README**
-
-Just tell me 👍
