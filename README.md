@@ -81,15 +81,9 @@ A modern **Weather Analytics Dashboard** built with **React and Redux Toolkit** 
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots here if you want)*
-
----
-
 ## 🤝 Connect With Me
 
-* **LinkedIn:** [https://www.linkedin.com/in/your-profile](https://www.linkedin.com/in/suraj-zagare-5592a724a/)
-* **GitHub:** [https://github.com/your-username](https://github.com/SurajZagare/)
+* **LinkedIn:** [https://www.linkedin.com/in/SurajZagare](https://www.linkedin.com/in/suraj-zagare-5592a724a/)
+* **GitHub:** [https://github.com/SurajZagare](https://github.com/SurajZagare/)
 
 
